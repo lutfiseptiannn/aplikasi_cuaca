@@ -8,24 +8,24 @@ part of 'forecast.dart';
 
 ForecastList _$ForecastListFromJson(Map<String, dynamic> json) {
   return ForecastList()
-    ..list = (json['list'] as List<dynamic>?)
+    ..daily = (json['daily'] as List<dynamic>?)
         ?.map((e) => Forecast.fromJson(e as Map<String, dynamic>))
         .toList();
 }
 
 Map<String, dynamic> _$ForecastListToJson(ForecastList instance) =>
     <String, dynamic>{
-      'list': instance.list,
+      'daily': instance.daily,
     };
 
 Forecast _$ForecastFromJson(Map<String, dynamic> json) {
   return Forecast()
-    ..dt = json['dt'] == null ? null : DateTime.parse(json['dt'] as String)
+    ..dt = Forecast._rawDateTime(json['dt'])
     ..main = json['main'] == null
         ? null
         : ForecastTemp.fromJson(json['main'] as Map<String, dynamic>)
     ..weather = (json['weather'] as List<dynamic>?)
-        ?.map((e) => ForecastIcon.fromJson(e as Map<String, dynamic>))
+        ?.map((e) => WeatherDetail.fromJson(e as Map<String, dynamic>))
         .toList();
 }
 

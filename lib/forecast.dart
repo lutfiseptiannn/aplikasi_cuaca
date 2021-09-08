@@ -1,3 +1,4 @@
+import 'package:aplikasi_cuaca/weather.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'forecast.g.dart';
@@ -5,7 +6,7 @@ part 'forecast.g.dart';
 @JsonSerializable()
 class ForecastList {
   ForecastList();
-  List<Forecast>? list;
+  List<Forecast>? daily;
   factory ForecastList.fromJson(Map<String, dynamic> json) =>
       _$ForecastListFromJson(json);
 
@@ -15,11 +16,15 @@ class ForecastList {
 @JsonSerializable()
 class Forecast {
   Forecast();
+  @JsonKey(fromJson: _rawDateTime)
   DateTime? dt;
   ForecastTemp? main;
-  List<ForecastIcon>? weather;
+  List<WeatherDetail>? weather;
   factory Forecast.fromJson(Map<String, dynamic> json) =>
       _$ForecastFromJson(json);
+
+  static DateTime? _rawDateTime(t) =>
+      DateTime.fromMillisecondsSinceEpoch(t * 1000);
 
   Map<String, dynamic> toJson() => _$ForecastToJson(this);
 }

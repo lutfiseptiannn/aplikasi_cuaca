@@ -1,10 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
+
 import 'package:aplikasi_cuaca/forecast.dart';
 import 'package:aplikasi_cuaca/weather.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-
 import 'package:intl/intl.dart';
 
 void main() {
@@ -27,6 +27,7 @@ class _WeatherAppState extends State<WeatherApp> {
   String errorMessage = '';
   String iconId = '';
   String iconIdF = '';
+  ForecastList? forecastResult;
 
   Future<void> fetchSearch(String input) async {
     try {
@@ -56,14 +57,13 @@ class _WeatherAppState extends State<WeatherApp> {
 
   Future<void> fetchForecast(String input) async {
     var foreResult = await http.get(Uri.parse(
-        'https://api.openweathermap.org/data/2.5/onecall?lat=$lat.44&lon=$lon.04&exclude=current,minutely,hourly&appid=99a8cf26eee9509f58079f049cbc3f3a&units=metric'));
+        'https://api.openweathermap.org/data/2.5/onecall?lat=$lat&lon=$lon&exclude=current,minutely,hourly&appid=99a8cf26eee9509f58079f049cbc3f3a&units=metric'));
     var result = json.decode(foreResult.body);
-    ForecastList forecastResult = ForecastList.fromJson(result);
+    forecastResult = ForecastList.fromJson(result);
 
     setState(() {
-      minTempForecast = forecastResult.list!.first.main!.temp_min!.round();
-      minTempForecast = forecastResult.list!.first.main!.temp_max!.round();
-      iconIdF = forecastResult.list!.first.weather!.first.icon!;
+      // minTempForecast = forecastResult.daily!.first.main!.temp_min!.round();
+      // minTempForecast = forecastResult.daily!.first.main!.temp_max!.round();
     });
   }
 
@@ -119,17 +119,16 @@ class _WeatherAppState extends State<WeatherApp> {
                     ),
                   ],
                 ),
-                Row(
-                  children: <Widget>[
-                    forecastElement(0, iconIdF),
-                    forecastElement(1, iconIdF),
-                    forecastElement(2, iconIdF),
-                    //forecastElement(3),
-                    //forecastElement(4),
-                    //forecastElement(5),
-                    //forecastElement(6)
-                  ],
-                ),
+                if (forecastResult != null)
+                  Container(
+                    height: 150,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: forecastResult!.daily!.length,
+                      itemBuilder: (context, index) => forecastElement(index,
+                          forecastResult!.daily![index].weather!.first.icon),
+                    ),
+                  ),
                 Column(
                   children: <Widget>[
                     Container(
@@ -183,6 +182,7 @@ Widget forecastElement(daysFromNow, iconIdF) {
       child: Padding(
         padding: const EdgeInsets.all(15.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
               new DateFormat.E().format(OneDayFromNow),
