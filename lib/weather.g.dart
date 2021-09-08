@@ -9,6 +9,9 @@ part of 'weather.dart';
 Weather _$WeatherFromJson(Map<String, dynamic> json) {
   return Weather()
     ..name = json['name'] as String?
+    ..coord = json['coord'] == null
+        ? null
+        : WeatherCoor.fromJson(json['coord'] as Map<String, dynamic>)
     ..main = json['main'] == null
         ? null
         : WeatherMain.fromJson(json['main'] as Map<String, dynamic>)
@@ -19,14 +22,15 @@ Weather _$WeatherFromJson(Map<String, dynamic> json) {
 
 Map<String, dynamic> _$WeatherToJson(Weather instance) => <String, dynamic>{
       'name': instance.name,
+      'coord': instance.coord,
       'main': instance.main,
       'weather': instance.weather,
     };
 
 WeatherCoor _$WeatherCoorFromJson(Map<String, dynamic> json) {
   return WeatherCoor()
-    ..lat = json['lat'] as double?
-    ..lon = json['lon'] as double?;
+    ..lat = (json['lat'] as num?)?.toDouble()
+    ..lon = (json['lon'] as num?)?.toDouble();
 }
 
 Map<String, dynamic> _$WeatherCoorToJson(WeatherCoor instance) =>
