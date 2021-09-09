@@ -20,18 +20,16 @@ Map<String, dynamic> _$ForecastListToJson(ForecastList instance) =>
 
 Forecast _$ForecastFromJson(Map<String, dynamic> json) {
   return Forecast()
-    ..dt = Forecast._rawDateTime(json['dt'])
-    ..main = json['main'] == null
+    ..temp = json['temp'] == null
         ? null
-        : ForecastTemp.fromJson(json['main'] as Map<String, dynamic>)
+        : ForecastTemp.fromJson(json['temp'] as Map<String, dynamic>)
     ..weather = (json['weather'] as List<dynamic>?)
         ?.map((e) => WeatherDetail.fromJson(e as Map<String, dynamic>))
         .toList();
 }
 
 Map<String, dynamic> _$ForecastToJson(Forecast instance) => <String, dynamic>{
-      'dt': instance.dt?.toIso8601String(),
-      'main': instance.main,
+      'temp': instance.temp,
       'weather': instance.weather,
     };
 
@@ -46,12 +44,12 @@ Map<String, dynamic> _$ForecastIconToJson(ForecastIcon instance) =>
 
 ForecastTemp _$ForecastTempFromJson(Map<String, dynamic> json) {
   return ForecastTemp()
-    ..temp_min = (json['temp_min'] as num?)?.toDouble()
-    ..temp_max = (json['temp_max'] as num?)?.toDouble();
+    ..min = (json['min'] as num?)?.toDouble()
+    ..max = (json['max'] as num?)?.toDouble();
 }
 
 Map<String, dynamic> _$ForecastTempToJson(ForecastTemp instance) =>
     <String, dynamic>{
-      'temp_min': instance.temp_min,
-      'temp_max': instance.temp_max,
+      'min': instance.min,
+      'max': instance.max,
     };

@@ -55,21 +55,21 @@ class _WeatherAppState extends State<WeatherApp> {
     }
   }
 
-  Future<void> fetchForecast(String input) async {
+  Future<void> fetchForecast() async {
     var foreResult = await http.get(Uri.parse(
         'https://api.openweathermap.org/data/2.5/onecall?lat=$lat&lon=$lon&exclude=current,minutely,hourly&appid=99a8cf26eee9509f58079f049cbc3f3a&units=metric'));
     var result = json.decode(foreResult.body);
     forecastResult = ForecastList.fromJson(result);
 
     setState(() {
-      // minTempForecast = forecastResult.daily!.first.main!.temp_min!.round();
-      // minTempForecast = forecastResult.daily!.first.main!.temp_max!.round();
+      minTempForecast = forecastResult!.daily!.first.temp!.min!.round();
+      maxTempForecast = forecastResult!.daily!.first.temp!.max!.round();
     });
   }
 
-  void onTextFieldSubmitted(String input) {
-    fetchSearch(input);
-    fetchForecast(input);
+  Future<void> onTextFieldSubmitted(String input) async {
+    await fetchSearch(input);
+    fetchForecast();
   }
 
   @override
@@ -85,11 +85,33 @@ class _WeatherAppState extends State<WeatherApp> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           body: Container(
-            decoration: BoxDecoration(color: Colors.black26),
+            decoration: BoxDecoration(color: Colors.black38),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
+                Container(
+                  width: 300,
+                  child: TextField(
+                    onSubmitted: (String input) {
+                      onTextFieldSubmitted(input);
+                    },
+                    style: TextStyle(color: Colors.white, fontSize: 25),
+                    decoration: InputDecoration(
+                        hintText: 'Search another location...',
+                        hintStyle:
+                            TextStyle(color: Colors.white, fontSize: 18.0),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide(
+                              color: Color.fromRGBO(205, 218, 228, 2),
+                            )),
+                        prefixIcon: Icon(
+                          Icons.search,
+                          color: Colors.white,
+                        )),
+                  ),
+                ),
                 Column(
                   children: [
                     if (iconId != '')
@@ -121,40 +143,25 @@ class _WeatherAppState extends State<WeatherApp> {
                 ),
                 if (forecastResult != null)
                   Container(
-                    height: 150,
+                    height: 175,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: forecastResult!.daily!.length,
-                      itemBuilder: (context, index) => forecastElement(index,
-                          forecastResult!.daily![index].weather!.first.icon),
+                      itemBuilder: (context, index) => forecastElement(
+                          index,
+                          forecastResult!.daily![index].weather!.first.icon,
+                          forecastResult!.daily![index].temp!.max!.round(),
+                          forecastResult!.daily![index].temp!.min!.round()),
                     ),
                   ),
                 Column(
                   children: <Widget>[
-                    Container(
-                      width: 300,
-                      child: TextField(
-                        onSubmitted: (String input) {
-                          onTextFieldSubmitted(input);
-                        },
-                        style: TextStyle(color: Colors.white, fontSize: 25),
-                        decoration: InputDecoration(
-                            hintText: 'Search another location...',
-                            hintStyle:
-                                TextStyle(color: Colors.white, fontSize: 18.0),
-                            prefixIcon: Icon(
-                              Icons.search,
-                              color: Colors.white,
-                            )),
-                      ),
-                    ),
                     Padding(
-                      padding: const EdgeInsets.only(
-                          top: 10, right: 32.0, left: 32.0),
+                      padding: const EdgeInsets.only(right: 30.0, left: 30.0),
                       child: Text(errorMessage,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              color: Colors.redAccent,
+                              color: Colors.red,
                               fontSize: Platform.isAndroid ? 20.0 : 25.0)),
                     )
                   ],
@@ -168,8 +175,7 @@ class _WeatherAppState extends State<WeatherApp> {
   }
 }
 
-Widget forecastElement(daysFromNow, iconIdF) {
-  //,minTempForecast, maxTempForecast) {
+Widget forecastElement(daysFromNow, iconIdF, maxTempForecast, minTempForecast) {
   var now = new DateTime.now();
   var OneDayFromNow = now.add(new Duration(days: daysFromNow));
   return Padding(
@@ -180,30 +186,30 @@ Widget forecastElement(daysFromNow, iconIdF) {
         borderRadius: BorderRadius.circular(10),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(15.0),
+        padding: const EdgeInsets.all(10.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
               new DateFormat.E().format(OneDayFromNow),
-              style: TextStyle(color: Colors.white, fontSize: 25),
+              style: TextStyle(color: Colors.white, fontSize: 20),
             ),
             Text(
               new DateFormat.MMMd().format(OneDayFromNow),
-              style: TextStyle(color: Colors.white, fontSize: 25),
+              style: TextStyle(color: Colors.white, fontSize: 20),
             ),
             Image.network(
               'http://openweathermap.org/img/wn/${iconIdF}@2x.png',
               width: 50,
             ),
-            //Text(
-            //'High: ' + maxTempForecast.toString() + ' °C',
-            //style: TextStyle(color: Colors.white, fontSize: 60.0),
-            //),
-            //Text(
-            //'Low: ' + minTempForecast.toString() + ' °C',
-            //style: TextStyle(color: Colors.white, fontSize: 60.0),
-            //),
+            Text(
+              'High: ' + maxTempForecast.toString() + ' °C',
+              style: TextStyle(color: Colors.white, fontSize: 20.0),
+            ),
+            Text(
+              'Low: ' + minTempForecast.toString() + ' °C',
+              style: TextStyle(color: Colors.white, fontSize: 20.0),
+            ),
           ],
         ),
       ),
