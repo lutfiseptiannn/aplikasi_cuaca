@@ -19,7 +19,7 @@ class CityName {
 @JsonSerializable()
 class Weather {
   Weather();
-
+  String? name;
   CityName? cityName;
   WeatherCoor? coord;
   WeatherMain? main;

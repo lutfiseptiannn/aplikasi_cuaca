@@ -4,28 +4,23 @@ import 'package:json_annotation/json_annotation.dart';
 part 'forecast.g.dart';
 
 @JsonSerializable()
+class Forecast {
+  Forecast();
+  List<ForecastList>? daily;
+  factory Forecast.fromJson(Map<String, dynamic> json) =>
+      _$ForecastFromJson(json);
+  Map<String, dynamic> toJson() => _$ForecastToJson(this);
+}
+
+@JsonSerializable()
 class ForecastList {
   ForecastList();
-  List<Forecast>? daily;
+  ForecastTemp? temp;
+  List<ForecastIcon>? weather;
   factory ForecastList.fromJson(Map<String, dynamic> json) =>
       _$ForecastListFromJson(json);
 
   Map<String, dynamic> toJson() => _$ForecastListToJson(this);
-}
-
-@JsonSerializable()
-class Forecast {
-  Forecast();
-  @JsonKey(fromJson: _rawDateTime)
-  ForecastTemp? temp;
-  List<WeatherDetail>? weather;
-  factory Forecast.fromJson(Map<String, dynamic> json) =>
-      _$ForecastFromJson(json);
-
-  static DateTime? _rawDateTime(t) =>
-      DateTime.fromMillisecondsSinceEpoch(t * 1000);
-
-  Map<String, dynamic> toJson() => _$ForecastToJson(this);
 }
 
 @JsonSerializable()

@@ -15,6 +15,7 @@ Future<void> setup() async {
 }
 
 void main() {
+  setup();
   runApp(WeatherApp());
 }
 
@@ -32,54 +33,18 @@ class _WeatherAppState extends State<WeatherApp> {
   String location = 'Jakarta';
   String weather = 'clear';
   String errorMessage = '';
-  String iconId = '';
-  String iconIdF = '';
-  ForecastList? forecastResult;
-
-  Future<void> fetchSearch(String input) async {
-    try {
-      var searchResult = await http.get(Uri.parse(
-          'https://api.openweathermap.org/data/2.5/weather?q=$input&appid=99a8cf26eee9509f58079f049cbc3f3a&units=metric'));
-      var result = json.decode(searchResult.body);
-      Weather weatherResult = Weather.fromJson(result);
-
-      setState(() {
-        temperature = weatherResult.main!.temp!.round();
-        weather = weatherResult.weather!.first.main!
-            .replaceAll(' ', '')
-            .toLowerCase();
-        errorMessage = '';
-        iconId = weatherResult.weather!.first.icon!;
-        lat = weatherResult.coord!.lat!;
-        lon = weatherResult.coord!.lon!;
-      });
-    } catch (error) {
-      setState(() {
-        errorMessage =
-            'Sorry, we dont have data about this city. Try another one.';
-      });
-    }
-  }
-
-  Future<void> fetchForecast() async {
-    var foreResult = await http.get(Uri.parse(
-        'https://api.openweathermap.org/data/2.5/onecall?lat=$lat&lon=$lon&exclude=current,minutely,hourly&appid=99a8cf26eee9509f58079f049cbc3f3a&units=metric'));
-    var result = json.decode(foreResult.body);
-    forecastResult = ForecastList.fromJson(result);
-
-    setState(() {
-      minTempForecast = forecastResult!.daily!.first.temp!.min!.round();
-      maxTempForecast = forecastResult!.daily!.first.temp!.max!.round();
-    });
-  }
 
   Future<void> onTextFieldSubmitted(String input) async {
-    await fetchSearch(input);
-    fetchForecast();
+    WeatherBloc _weatherBloc = getIt<WeatherBloc>();
+    await _weatherBloc.fetchWeather(input);
+    WeatherBloc _forecastBloc = getIt<WeatherBloc>();
+    _forecastBloc.fetchforecast(lat, lon);
   }
 
   @override
   Widget build(BuildContext context) {
+    WeatherBloc _weatherBloc = getIt<WeatherBloc>();
+    WeatherBloc _forecastBloc = getIt<WeatherBloc>();
     return MaterialApp(
       home: Container(
         decoration: BoxDecoration(
@@ -118,56 +83,67 @@ class _WeatherAppState extends State<WeatherApp> {
                         )),
                   ),
                 ),
-                // bungkus column ini dengan StreamBuilder lalu oper broadcastnya kesini
-                Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        if (iconId != '')
+                StreamBuilder<Weather?>(
+                    stream: _weatherBloc.result,
+                    builder: (context, snapshot) {
+                      Weather? data = snapshot.data;
+                      if (data == null) return Container();
+                      return Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Center(
+                                child: Image.network(
+                                  'http://openweathermap.org/img/wn/${data.weather!.first.icon}@2x.png',
+                                  width: 100,
+                                ),
+                              ),
+                              Center(
+                                child: Text(
+                                  data.weather!.first.main!,
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 30.0),
+                                ),
+                              ),
+                            ],
+                          ),
                           Center(
-                            child: Image.network(
-                              'http://openweathermap.org/img/wn/${iconId}@2x.png',
-                              width: 100,
+                            child: Text(
+                              data.main!.temp.toString() + ' °C',
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: 50.0),
                             ),
                           ),
-                        Center(
-                          child: Text(
-                            weather,
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 30.0),
+                          Center(
+                            child: Text(
+                              data.name!,
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: 40.0),
+                            ),
                           ),
+                        ],
+                      );
+                    }),
+                StreamBuilder<Forecast?>(
+                    stream: _forecastBloc.foreResult,
+                    builder: (context, snapshot) {
+                      Forecast? value = snapshot.data;
+                      if (value == null) return Container();
+                      return Container(
+                        height: 175,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: value.daily!.length,
+                          itemBuilder: (context, index) => forecastElement(
+                              index,
+                              value.daily![index].weather!.first.icon,
+                              value.daily![index].temp!.max!.round(),
+                              value.daily![index].temp!.min!.round()),
                         ),
-                      ],
-                    ),
-                    Center(
-                      child: Text(
-                        temperature.toString() + ' °C',
-                        style: TextStyle(color: Colors.white, fontSize: 50.0),
-                      ),
-                    ),
-                    Center(
-                      child: Text(
-                        location,
-                        style: TextStyle(color: Colors.white, fontSize: 40.0),
-                      ),
-                    ),
-                  ],
-                ),
-                if (forecastResult != null)
-                  Container(
-                    height: 175,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: forecastResult!.daily!.length,
-                      itemBuilder: (context, index) => forecastElement(
-                          index,
-                          forecastResult!.daily![index].weather!.first.icon,
-                          forecastResult!.daily![index].temp!.max!.round(),
-                          forecastResult!.daily![index].temp!.min!.round()),
-                    ),
-                  ),
+                      );
+                    }),
                 Column(
                   children: <Widget>[
                     Padding(

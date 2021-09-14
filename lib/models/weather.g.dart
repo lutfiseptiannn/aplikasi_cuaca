@@ -18,6 +18,7 @@ Map<String, dynamic> _$CityNameToJson(CityName instance) => <String, dynamic>{
 
 Weather _$WeatherFromJson(Map<String, dynamic> json) {
   return Weather()
+    ..name = json['name'] as String?
     ..cityName = json['cityName'] == null
         ? null
         : CityName.fromJson(json['cityName'] as Map<String, dynamic>)
@@ -33,6 +34,7 @@ Weather _$WeatherFromJson(Map<String, dynamic> json) {
 }
 
 Map<String, dynamic> _$WeatherToJson(Weather instance) => <String, dynamic>{
+      'name': instance.name,
       'cityName': instance.cityName,
       'coord': instance.coord,
       'main': instance.main,
