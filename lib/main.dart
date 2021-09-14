@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:aplikasi_cuaca/bloc/weather_bloc.dart';
@@ -6,7 +5,6 @@ import 'package:aplikasi_cuaca/models/forecast.dart';
 import 'package:aplikasi_cuaca/models/weather.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
 final getIt = GetIt.instance;
@@ -37,8 +35,6 @@ class _WeatherAppState extends State<WeatherApp> {
   Future<void> onTextFieldSubmitted(String input) async {
     WeatherBloc _weatherBloc = getIt<WeatherBloc>();
     await _weatherBloc.fetchWeather(input);
-    WeatherBloc _forecastBloc = getIt<WeatherBloc>();
-    _forecastBloc.fetchforecast(lat, lon);
   }
 
   @override
