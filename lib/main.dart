@@ -118,6 +118,7 @@ class _WeatherAppState extends State<WeatherApp> {
                         )),
                   ),
                 ),
+                // bungkus column ini dengan StreamBuilder lalu oper broadcastnya kesini
                 Column(
                   children: [
                     Row(
