@@ -3,10 +3,24 @@ import 'package:json_annotation/json_annotation.dart';
 part 'weather.g.dart';
 
 @JsonSerializable()
+class CityName {
+  CityName(
+    this.name,
+  );
+
+  String name;
+
+  factory CityName.fromJson(Map<String, dynamic> json) =>
+      _$CityNameFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CityNameToJson(this);
+}
+
+@JsonSerializable()
 class Weather {
   Weather();
 
-  String? name;
+  CityName? cityName;
   WeatherCoor? coord;
   WeatherMain? main;
   List<WeatherDetail>? weather;

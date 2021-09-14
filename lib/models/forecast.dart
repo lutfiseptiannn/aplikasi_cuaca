@@ -1,4 +1,4 @@
-import 'package:aplikasi_cuaca/weather.dart';
+import 'package:aplikasi_cuaca/models/weather.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'forecast.g.dart';
@@ -17,8 +17,7 @@ class ForecastList {
 class Forecast {
   Forecast();
   @JsonKey(fromJson: _rawDateTime)
-  DateTime? dt;
-  ForecastTemp? main;
+  ForecastTemp? temp;
   List<WeatherDetail>? weather;
   factory Forecast.fromJson(Map<String, dynamic> json) =>
       _$ForecastFromJson(json);
@@ -43,8 +42,8 @@ class ForecastIcon {
 class ForecastTemp {
   ForecastTemp();
 
-  double? temp_min;
-  double? temp_max;
+  double? min;
+  double? max;
   factory ForecastTemp.fromJson(Map<String, dynamic> json) =>
       _$ForecastTempFromJson(json);
 
