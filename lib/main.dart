@@ -1,11 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:aplikasi_cuaca/forecast.dart';
-import 'package:aplikasi_cuaca/weather.dart';
+import 'package:aplikasi_cuaca/bloc/weather_bloc.dart';
+import 'package:aplikasi_cuaca/models/forecast.dart';
+import 'package:aplikasi_cuaca/models/weather.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+
+final getIt = GetIt.instance;
+Future<void> setup() async {
+  getIt.registerSingleton<WeatherBloc>(WeatherBloc());
+}
 
 void main() {
   runApp(WeatherApp());
@@ -37,7 +44,6 @@ class _WeatherAppState extends State<WeatherApp> {
       Weather weatherResult = Weather.fromJson(result);
 
       setState(() {
-        location = weatherResult.name!;
         temperature = weatherResult.main!.temp!.round();
         weather = weatherResult.weather!.first.main!
             .replaceAll(' ', '')
@@ -114,23 +120,30 @@ class _WeatherAppState extends State<WeatherApp> {
                 ),
                 Column(
                   children: [
-                    if (iconId != '')
-                      Center(
-                        child: Image.network(
-                          'http://openweathermap.org/img/wn/${iconId}@2x.png',
-                          width: 100,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        if (iconId != '')
+                          Center(
+                            child: Image.network(
+                              'http://openweathermap.org/img/wn/${iconId}@2x.png',
+                              width: 100,
+                            ),
+                          ),
+                        Center(
+                          child: Text(
+                            weather,
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 30.0),
+                          ),
                         ),
-                      ),
-                    Center(
-                      child: Text(
-                        temperature.toString() + ' °C',
-                        style: TextStyle(color: Colors.white, fontSize: 60.0),
-                      ),
+                      ],
                     ),
                     Center(
                       child: Text(
-                        weather,
-                        style: TextStyle(color: Colors.white, fontSize: 30.0),
+                        temperature.toString() + ' °C',
+                        style: TextStyle(color: Colors.white, fontSize: 50.0),
                       ),
                     ),
                     Center(
@@ -162,7 +175,7 @@ class _WeatherAppState extends State<WeatherApp> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                               color: Colors.red,
-                              fontSize: Platform.isAndroid ? 20.0 : 25.0)),
+                              fontSize: Platform.isAndroid ? 20.0 : 20.0)),
                     )
                   ],
                 )

@@ -1,4 +1,4 @@
-import 'package:aplikasi_cuaca/weather.dart';
+import 'package:aplikasi_cuaca/models/weather.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'forecast.g.dart';
