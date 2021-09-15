@@ -24,14 +24,6 @@ class WeatherBloc implements Bloc {
     return;
   }
 
-  final _bgController = BehaviorSubject<Weather?>();
-  Stream<Weather?> get bgResult => _bgController.stream.asBroadcastStream();
-
-  Future<void> fetchBg(String main) async {
-    Weather bg = await WeatherAPI().getWeather(main);
-    _bgController.add(bg);
-  }
-
   final _forecastController = BehaviorSubject<Forecast?>();
   Stream<Forecast?> get foreResult =>
       _forecastController.stream.asBroadcastStream();
