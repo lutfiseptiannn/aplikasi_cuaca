@@ -16,6 +16,7 @@ class WeatherBloc implements Bloc {
   Future<void> fetchWeather(String name) async {
     Weather weather = await WeatherAPI().getWeather(name);
     _weatherController.add(weather);
+    fetchforecast(weather.coord!.lat!, weather.coord!.lon!);
   }
 
   final _forecastController = BehaviorSubject<Forecast?>();
