@@ -14,16 +14,21 @@ class WeatherBloc implements Bloc {
   Stream<Weather?> get result => _weatherController.stream.asBroadcastStream();
 
   Future<void> fetchWeather(String name) async {
-    Weather weather = await WeatherAPI().getWeather(name);
-    _weatherController.add(weather);
-    fetchforecast(weather.coord!.lat!, weather.coord!.lon!);
+    try {
+      Weather weather = await WeatherAPI().getWeather(name);
+      _weatherController.add(weather);
+      fetchForecast(weather.coord!.lat!, weather.coord!.lon!);
+    } catch (e) {
+      _weatherController.addError(e);
+    }
+    return;
   }
 
   final _forecastController = BehaviorSubject<Forecast?>();
   Stream<Forecast?> get foreResult =>
       _forecastController.stream.asBroadcastStream();
 
-  Future<void> fetchforecast(double lat, double lon) async {
+  Future<void> fetchForecast(double lat, double lon) async {
     Forecast forecast = await WeatherAPI().getForecast(lat, lon);
     _forecastController.add(forecast);
   }
