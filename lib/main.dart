@@ -6,6 +6,7 @@ import 'package:aplikasi_cuaca/models/weather.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final getIt = GetIt.instance;
 Future<void> setup() async {
@@ -23,7 +24,21 @@ class WeatherApp extends StatefulWidget {
 }
 
 class _WeatherAppState extends State<WeatherApp> {
-  String weather = 'clear';
+  TextEditingController cityField = TextEditingController();
+  String city = '';
+  Future<void> checkLastLocation() async {
+    var sp = await SharedPreferences.getInstance();
+    WeatherBloc _weatherBloc = getIt<WeatherBloc>();
+    if (sp.containsKey('name')) {
+      cityField.text = await _weatherBloc.getString();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    checkLastLocation();
+  }
 
   Future<void> onTextFieldSubmitted(String input) async {
     WeatherBloc _weatherBloc = getIt<WeatherBloc>();
@@ -36,19 +51,19 @@ class _WeatherAppState extends State<WeatherApp> {
 
     return MaterialApp(
       home: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.black54,
         body: StreamBuilder<Weather?>(
             stream: _weatherBloc.result,
             builder: (context, snapshot) {
+              Weather? data = snapshot.data;
               return Container(
-                decoration: (snapshot.hasData)
+                decoration: (data != null)
                     ? BoxDecoration(
-                        color: Colors.black38,
                         image: DecorationImage(
                             image: AssetImage(
-                                'images/${snapshot.data!.weather!.first.main!.replaceAll(' ', '').toLowerCase()}.png'),
+                                'images/${data.weather!.first.main!.replaceAll(' ', '').toLowerCase()}.png'),
                             fit: BoxFit.cover))
-                    : BoxDecoration(color: Colors.black38),
+                    : BoxDecoration(color: Colors.black87),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -57,8 +72,11 @@ class _WeatherAppState extends State<WeatherApp> {
                       width: 300,
                       child: TextField(
                         onSubmitted: (String input) {
-                          onTextFieldSubmitted(input);
+                          onTextFieldSubmitted(
+                            input,
+                          );
                         },
+                        controller: cityField,
                         style: TextStyle(color: Colors.white, fontSize: 25),
                         decoration: InputDecoration(
                             hintText: 'Search another location...',
@@ -85,15 +103,11 @@ class _WeatherAppState extends State<WeatherApp> {
                                 color: Colors.red.shade500,
                                 fontSize: Platform.isAndroid ? 30.0 : 25.0)),
                       ),
-                    if (snapshot.hasData)
+                    if (snapshot.connectionState == ConnectionState.active &&
+                        data == null)
+                      CircularProgressIndicator(),
+                    if (data != null)
                       Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage(
-                                'images/${snapshot.data!.weather!.first.main!.replaceAll(' ', '').toLowerCase()}.png'),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
                         child: Column(
                           children: [
                             Row(
@@ -102,13 +116,13 @@ class _WeatherAppState extends State<WeatherApp> {
                               children: [
                                 Center(
                                   child: Image.network(
-                                    'http://openweathermap.org/img/wn/${snapshot.data!.weather!.first.icon}@2x.png',
+                                    'http://openweathermap.org/img/wn/${data.weather!.first.icon}@2x.png',
                                     width: 100,
                                   ),
                                 ),
                                 Center(
                                   child: Text(
-                                    snapshot.data!.weather!.first.main!,
+                                    data.weather!.first.main!,
                                     style: TextStyle(
                                         color: Colors.white, fontSize: 30.0),
                                   ),
@@ -117,15 +131,14 @@ class _WeatherAppState extends State<WeatherApp> {
                             ),
                             Center(
                               child: Text(
-                                snapshot.data!.main!.temp!.round().toString() +
-                                    ' °C',
+                                data.main!.temp!.round().toString() + ' °C',
                                 style: TextStyle(
                                     color: Colors.white, fontSize: 50.0),
                               ),
                             ),
                             Center(
                               child: Text(
-                                snapshot.data!.name!,
+                                data.name!,
                                 style: TextStyle(
                                     color: Colors.white, fontSize: 40.0),
                               ),
